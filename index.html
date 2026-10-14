@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রস্তুতি পাঠ</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --primary: #059669;
+            --primary-hover: #047857;
+            --accent-bg: #f8fafc;
+            --input-bg: #ffffff;
+            --input-text: #1f2937;
+            --table-header: #f8fafc;
+            --table-hover: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --accent-bg: #0f172a;
+            --input-bg: #0f172a;
+            --input-text: #f8fafc;
+            --table-header: #1e293b;
+            --table-hover: #334155;
+        }
+
+        * { box-sizing: border-box; font-family: 'SolaimanLipi', Arial, sans-serif; transition: background 0.3s, color 0.3s; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; }
+        
+        .exam-card { background: var(--card-bg); border-radius: 12px; padding: 20px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border-color); flex-wrap: wrap; gap: 10px; }
+        .logo-text { font-weight: bold; font-size: 18px; color: var(--primary); }
+        
+        .header-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-leaderboard-toggle { background: #e0e7ff; color: #4338ca; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-leaderboard-toggle:hover { background: #c7d2fe; }
+        
+        .btn-admin-toggle { background: #fef3c7; color: #d97706; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-admin-toggle:hover { background: #fde68a; }
+        
+        .btn-theme-toggle { background: var(--border-color); color: var(--text-color); border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); background-color: var(--input-bg); color: var(--input-text); border-radius: 8px; font-size: 15px; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .exam-info-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; color: var(--primary); font-size: 14px; border: 1px solid var(--border-color); }
+        .timer-badge { background: #fee2e2; color: #dc2626; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
+
+        .q-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); word-break: break-word; }
+        .q-title { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; line-height: 1.4; }
+        .stem-box { background: var(--accent-bg); border-left: 3px solid var(--primary); padding: 8px 10px; margin-bottom: 10px; border-radius: 0 6px 6px 0; font-size: 14px; line-height: 1.5; }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-label:hover { border-color: var(--primary); }
+        .option-label input[type="radio"] { display: none; }
+        
+        .custom-radio {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .option-label input[type="radio"]:checked + .custom-radio {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .res-opt-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+        .res-opt-item { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 13px; background: var(--accent-bg); line-height: 1.35; display: flex; align-items: center; }
+        
+        .res-opt-item.user-correct { background: #d1fae5; border-color: #10b981; color: #065f46; font-weight: bold; }
+        .res-opt-item.user-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: bold; }
+        .res-opt-item.correct-target { background: #ecfdf5; border-color: #10b981; color: #047857; font-weight: bold; }
+
+        .ans-summary-line { padding: 6px 10px; border-radius: 6px; margin-top: 6px; font-size: 12.5px; font-weight: 600; line-height: 1.35; }
+        .ans-summary-line.correct { background: rgba(16, 185, 129, 0.1); color: #047857; border: 1px solid rgba(16, 185, 129, 0.25); }
+        .ans-summary-line.wrong { background: rgba(239, 68, 68, 0.1); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.25); }
+        .ans-summary-line.skipped { background: rgba(245, 158, 11, 0.1); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.25); }
+
+        .btn-submit {
+            background: var(--primary); color: #fff; border: none; padding: 12px 25px; 
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%;
+        }
+        .btn-submit:hover { background: var(--primary-hover); }
+        
+        .btn-pdf { background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-pdf:hover { background: #1d4ed8; }
+
+        .btn-doc { background: #0284c7; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-doc:hover { background: #0369a1; }
+
+        .btn-backup { background: #7c3aed; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; margin-right: 5px; }
+        .btn-backup:hover { background: #6d28d9; }
+
+        .btn-reset { background: #dc2626; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-reset:hover { background: #b91c1c; }
+
+        .result-box { display: none; }
+        .badge-skipped { background: #f59e0b; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; flex-shrink: 0; white-space: nowrap; }
+        .badge-correct { background: #10b981; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; flex-shrink: 0; white-space: nowrap; }
+        .badge-wrong { background: #ef4444; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; flex-shrink: 0; white-space: nowrap; }
+        
+        .exp-box { background: rgba(99, 102, 241, 0.08); border-left: 3px solid #6366f1; padding: 6px 10px; margin-top: 6px; border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--text-color); line-height: 1.45; }
+        
+        .hidden { display: none !important; }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 10px 16px; font-size: 14px; font-weight: bold;
+            color: var(--text-color); cursor: pointer; border-bottom: 3px solid transparent; opacity: 0.7; transition: all 0.2s ease;
+        }
+        .tab-btn:hover { opacity: 1; }
+        .tab-btn.active { border-bottom-color: var(--primary); color: var(--primary); opacity: 1; }
+
+        .admin-table-wrapper { 
+            width: 100%; max-height: 280px; overflow-y: auto; overflow-x: auto; 
+            border-radius: 8px; border: 1px solid var(--border-color); margin-top: 10px; 
+        }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .admin-table th, .admin-table td { border-bottom: 1px solid var(--border-color); padding: 10px 12px; vertical-align: middle; word-wrap: break-word; }
+        .admin-table th { background-color: var(--table-header); position: sticky; top: 0; z-index: 10; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        .admin-table tr:hover { background-color: var(--table-hover); }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        
+        .tag-subject { display: inline-block; background: rgba(3, 105, 161, 0.1); color: #0284c7; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; line-height: 1.4; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 15px; backdrop-filter: blur(3px);
+        }
+        
+        .modal-card {
+            background: var(--card-bg); border-radius: 12px; width: 100%; max-width: 650px;
+            max-height: 85vh; display: flex; flex-direction: column; padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 600px) { .res-opt-list { grid-template-columns: 1fr; } }
+
+        @media print {
+            @page { size: A4; margin: 10mm; }
+            body { background: #fff !important; color: #000 !important; padding: 0 !important; font-size: 10pt; }
+            .header-bar, #startPage, #examForm, #teacherPanel, .btn-submit, .btn-pdf, .btn-doc, .btn-admin-toggle, .btn-theme-toggle, .btn-leaderboard-toggle, .modal-overlay { display: none !important; }
+            .exam-card { box-shadow: none !important; padding: 0 !important; max-width: 100% !important; border: none !important; background: #fff !important; }
+            .result-box { display: block !important; }
+            
+            .pdf-header { text-align: center; border-bottom: 1.5px solid #000; padding-bottom: 4px; margin-bottom: 10px; }
+            .pdf-header h2 { margin: 0; font-size: 15px; }
+            .pdf-header p { margin: 2px 0; font-size: 10.5px; }
+            
+            .q-card { break-inside: avoid; page-break-inside: avoid; border: 1px solid #ccc !important; padding: 6px 10px !important; margin-bottom: 6px !important; background: #fff !important; color: #000 !important; border-radius: 5px !important; }
+            .q-title { font-size: 10.5pt !important; margin-bottom: 4px !important; }
+            
+            .res-opt-list { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 4px !important; margin: 4px 0 !important; }
+            .res-opt-item { padding: 4px 6px !important; font-size: 9pt !important; border-radius: 4px !important; border-color: #ddd !important; }
+            .res-opt-item.user-correct, .res-opt-item.correct-target { background: #f0fdf4 !important; border-color: #10b981 !important; color: #065f46 !important; }
+            .res-opt-item.user-wrong { background: #fef2f2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+            
+            .ans-summary-line { padding: 4px 6px !important; margin-top: 3px !important; font-size: 9pt !important; }
+            .exp-box { padding: 4px 6px !important; margin-top: 4px !important; font-size: 8.5pt !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="exam-card">
+    <div class="header-bar">
+        <div class="logo-text">🎓 প্রস্তুতি পাঠ</div>
+        <div class="header-btns">
+            <button class="btn-leaderboard-toggle" onclick="window.openLeaderboardModal()">🏆 লিডারবোর্ড</button>
+            <button class="btn-theme-toggle" onclick="window.toggleTheme()" id="themeBtn">🌙 ডার্ক মোড</button>
+            <button class="btn-admin-toggle" onclick="window.openTeacherPanel()">👨‍🏫 শিক্ষক প্যানেল</button>
+        </div>
+    </div>
+
+    <!-- ১. শিক্ষার্থী শুরুর ফর্ম -->
+    <div id="startPage">
+        <div class="form-group">
+            <label>শিক্ষার্থীর নাম:</label>
+            <input type="text" id="studentNameInput" class="form-control" placeholder="আপনার পূর্ণ নাম লিখুন..." oninput="window.checkAndAssignId()">
+        </div>
+        <div class="form-group">
+            <label>স্কুলের নাম:</label>
+            <input type="text" id="schoolNameInput" class="form-control" placeholder="আপনার স্কুলের নাম লিখুন..." oninput="window.checkAndAssignId()">
+        </div>
+        <div class="form-group">
+            <label>আপনার নির্ধারিত আইডি (Auto ID):</label>
+            <input type="text" id="studentIdDisplay" class="form-control" readonly style="background-color: var(--accent-bg); font-weight: bold; color: var(--primary);">
+        </div>
+        <div class="form-group">
+            <label>পরীক্ষার বিষয় বা ক্যাটাগরি (Subject/Exam):</label>
+            <select id="subjectInput" class="form-control" onchange="window.loadStudentChapterDropdown()"></select>
+        </div>
+        <div class="form-group">
+            <label>অধ্যায় বা সিলেবাস নির্বাচন করুন:</label>
+            <select id="chapterInput" class="form-control">
+                <option value="">-- প্রথমে বিষয় নির্বাচন করুন --</option>
+            </select>
+        </div>
+        <button class="btn-submit" onclick="window.startExam()">পরীক্ষা শুরু করুন 🚀</button>
+    </div>
+
+    <!-- ২. মূল পরীক্ষা পেজ -->
+    <div id="examForm" class="hidden">
+        <div class="exam-info-bar">
+            <div>
+                <span id="displayStudentName" style="display:block;"></span>
+                <span id="displayDetails" style="font-size: 12px; opacity: 0.9;"></span>
+            </div>
+            <div class="timer-badge">⏱️ সময় বাকি: <span id="timerDisplay">00:00</span></div>
+        </div>
+        <div id="questionsContainer"></div>
+        <button class="btn-submit" onclick="window.submitExam()">পরীক্ষা জমা দিন</button>
+    </div>
+
+    <!-- ৩. ফলাফল পেজ -->
+    <div id="resultBox" class="result-box">
+        <div class="pdf-header">
+            <h2>শিক্ষা মিশন প্রাকটিস পোর্টাল</h2>
+            <div id="pdfStudentMeta" style="font-size: 13px; font-weight: bold; margin-top: 5px;"></div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.05)); border: 1.5px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+            <div id="scoreSummary" style="font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 4px;"></div>
+            <div id="studentRankBox" style="font-size: 14px; font-weight: 600; opacity: 0.9;"></div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn-pdf" onclick="window.print()">📄 রেজাল্ট ফাইল/PDF প্রিন্ট করুন</button>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 15px;">
+        
+        <div id="resultDetails"></div>
+        
+        <button class="btn-submit" style="margin-top: 20px;" onclick="window.returnHome()">হোম পেজে ফিরে যান</button>
+    </div>
+
+    <!-- ৪. শিক্ষক প্যানেল -->
+    <div id="teacherPanel" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: var(--primary);">শিক্ষক প্যানেল ও প্রশ্ন ম্যানেজমেন্ট (ক্লাউড)</h3>
+            <button onclick="window.closeTeacherPanel()" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">বন্ধ করুন</button>
+        </div>
+
+        <div id="teacherLoginBox">
+            <p style="font-size: 14px;">শিক্ষক প্যানেলে ঢুকতে সিক্রেট পাসওয়ার্ড দিন:</p>
+            <input type="email" id="teacherEmail" class="form-control" autocomplete="username" placeholder="শিক্ষকের ইমেইল লিখুন..." style="margin-bottom: 10px;">
+            <input type="password" id="teacherPass" class="form-control" autocomplete="current-password" placeholder="পাসওয়ার্ড লিখুন..." style="margin-bottom: 10px;">
+            <button class="btn-submit" onclick="window.verifyTeacher()">লগইন করুন</button>
+        </div>
+
+        <div id="teacherDashboard" class="hidden">
+            
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h4 style="margin: 0; color: #d97706;">💾 ক্লাউড ডেটা ম্যানেজমেন্ট ও আইডি রিসেট</h4>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; opacity: 0.8;">সম্পূর্ণ ডাটাবেস ব্যাকআপ নিন অথবা আইডি সিকোয়েন্স রিসেট করে SM-101 থেকে শুরু করুন।</p>
+                </div>
+                <div>
+                    <button class="btn-backup" onclick="window.exportCloudBackup()">📥 ব্যাকআপ</button>
+                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="window.importCloudBackup(event)">
+                    <button class="btn-backup" style="background: #0284c7;" onclick="document.getElementById('importFile').click()">📤 রিস্টোর</button>
+                    <button class="btn-reset" onclick="window.resetCloudIdSequence()">🔄 আইডি রিসেট (SM-101)</button>
+                </div>
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid var(--primary); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: var(--primary);">🌐 অনলাইন পরীক্ষার প্রশ্ন আপলোড (ক্লাউড সার্ভার)</h4>
+                <div class="form-group">
+                    <label>বিষয় বা ক্যাটাগরি নির্বাচন করুন:</label>
+                    <select id="configSubject" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>অধ্যায় বা ফাইনাল সিলেবাসের নাম:</label>
+                    <input type="text" id="configChapterText" class="form-control" placeholder="যেমন: ৩য় অধ্যায় বা ফাইনাল সিলেবাস - ২০২৬">
+                </div>
+                <div class="form-group">
+                    <label>পরীক্ষার সময় (মিনিটে):</label>
+                    <input type="number" id="configTime" class="form-control" value="10">
+                </div>
+                <div class="form-group">
+                    <label>মার্কডাউন প্রশ্ন পেস্ট করুন (Q, Stem, A, B, C, D, Ans, Exp):</label>
+                    <textarea id="configMarkdown" class="form-control" rows="6" placeholder="Q: প্রশ্ন...&#10;Stem: i. পয়েন্ট...&#10;ii. পয়েন্ট...&#10;A) অপশন ক&#10;B) অপশন খ&#10;C) অপশন গ&#10;D) অপশন ঘ&#10;Ans: C&#10;Exp: ব্যাখ্যা..."></textarea>
+                </div>
+                <button class="btn-submit" onclick="window.saveTeacherSettings()">ক্লাউডে এই পরীক্ষা সেভ করুন</button>
+            </div>
+
+            <div style="background: rgba(37, 99, 235, 0.05); border: 1px solid #3b82f6; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2563eb;">📄 সহজ ওয়ার্ড ফাইল (Word Doc) মেকার (দুই কলাম ও উত্তরমালা সহ)</h4>
+                <div class="form-group">
+                    <label>স্কুল বা কলেজের নাম:</label>
+                    <input type="text" id="docSchoolName" class="form-control" value="শিক্ষা মিশন ইনস্টিটিউট">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>পরীক্ষার নাম:</label>
+                        <input type="text" id="docExamTitle" class="form-control" value="মডেল টেস্ট - ২০২৬">
+                    </div>
+                    <div class="form-group">
+                        <label>শ্রেণি ও শাখা:</label>
+                        <input type="text" id="docClass" class="form-control" value="শ্রেণি: দশম">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>সময়:</label>
+                        <input type="text" id="docTime" class="form-control" value="৩০ মিনিট">
+                    </div>
+                    <div class="form-group">
+                        <label>পূর্ণমান:</label>
+                        <input type="text" id="docMarks" class="form-control" value="৩০">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>বিষয় নির্বাচন করুন:</label>
+                        <select id="docSubjectSelect" class="form-control" onchange="window.loadDocChapters()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>অধ্যায় / সিলেবাস নির্বাচন করুন:</label>
+                        <select id="docChapterSelect" class="form-control">
+                            <option value="">-- প্রথমে বিষয় সিলেক্ট করুন --</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-doc" onclick="window.downloadSimpleWordDoc()">📥 সরাসরি ডক্স ফাইল (Word Doc) ডাউনলোড করুন</button>
+            </div>
+
+            <div class="tab-container">
+                <button class="tab-btn active" id="tabExamBtn" onclick="window.switchTab('exams')">📝 ক্লাউডে সেভ করা পরীক্ষার তালিকা</button>
+                <button class="tab-btn" id="tabRecordBtn" onclick="window.switchTab('records')">🏆 ক্লাউড মেধা তালিকা</button>
+            </div>
+
+            <div id="tabExamsContent">
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>বিষয় / ক্যাটাগরি</th><th>অধ্যায় / সিলেবাস</th><th style="width: 80px; text-align: center;">একশন</th></tr>
+                        </thead>
+                        <tbody id="createdExamsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabRecordsContent" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <span style="font-size: 13px; font-weight: bold;">শিক্ষার্থীদের পূর্ণ ফলাফল বিবরণী (ক্লাউড):</span>
+                    <select id="filterSubject" class="form-control" style="width: 180px; font-size: 12px; padding: 5px;" onchange="window.loadAdminRecords()">
+                        <option value="all">সকল পরীক্ষা</option>
+                    </select>
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">র‍্যাংক</th>
+                                <th>আইডি</th>
+                                <th>নাম</th>
+                                <th>স্কুল</th>
+                                <th>পরীক্ষা / বিষয়</th>
+                                <th style="text-align: center;">স্কোর</th>
+                                <th>সময়</th>
+                                <th style="text-align: center;">একশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRecordsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="leaderboardModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; color: var(--primary);">🏆 আইডিভিত্তিক লাইভ লিডারবোর্ড (ক্লাউড)</h3>
+            <button onclick="window.closeLeaderboardModal()" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">✕ বন্ধ করুন</button>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <p style="margin: 0; font-size: 12px; opacity: 0.8;">শিক্ষার্থীদের মেধা তালিকা ও প্রাপ্ত নম্বর:</p>
+            <select id="publicFilterSubject" class="form-control" style="width: 180px; font-size: 12px; padding: 6px;" onchange="window.loadPublicLeaderboard()">
+                <option value="all">সকল পরীক্ষা</option>
+            </select>
+        </div>
+
+        <div class="admin-table-wrapper" style="max-height: 400px;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 90px; text-align: center;">র‍্যাংক</th>
+                        <th>আইডি</th>
+                        <th>পরীক্ষা / বিষয় ও অধ্যায়</th>
+                        <th style="text-align: center;">প্রাপ্ত স্কোর</th>
+                    </tr>
+                </thead>
+                <tbody id="publicLeaderboardBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCazczFxN9_Z4liid8zocaNU8U2lJbkKIQ",
+        authDomain: "exam-portal-2421f.firebaseapp.com",
+        databaseURL: "https://exam-portal-2421f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "exam-portal-2421f",
+        storageBucket: "exam-portal-2421f.appspot.com",
+        messagingSenderId: "135647470617",
+        appId: "1:135647470617:web:9198c39b34048698177688",
+        measurementId: "G-SWEBYBTK8R"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    window.toggleTheme = function() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const themeBtn = document.getElementById('themeBtn');
+        if(currentTheme === 'light') {
+            html.setAttribute('data-theme', 'dark');
+            if(themeBtn) themeBtn.innerText = "☀️ লাইট মোড";
+            localStorage.setItem('portal_theme', 'dark');
+        } else {
+            html.setAttribute('data-theme', 'light');
+            if(themeBtn) themeBtn.innerText = "🌙 ডার্ক মোড";
+            localStorage.setItem('portal_theme', 'light');
+        }
+    }
+
+    window.switchTab = function(tabName) {
+        const tabExamBtn = document.getElementById('tabExamBtn');
+        const tabRecordBtn = document.getElementById('tabRecordBtn');
+        const tabExamsContent = document.getElementById('tabExamsContent');
+        const tabRecordsContent = document.getElementById('tabRecordsContent');
+
+        if(tabName === 'exams') {
+            tabExamBtn.classList.add('active');
+            tabRecordBtn.classList.remove('active');
+            tabExamsContent.classList.remove('hidden');
+            tabRecordsContent.classList.add('hidden');
+        } else {
+            tabRecordBtn.classList.add('active');
+            tabExamBtn.classList.remove('active');
+            tabRecordsContent.classList.remove('hidden');
+            tabExamsContent.classList.add('hidden');
+            window.loadAdminRecords();
+        }
+    }
+
+    window.openLeaderboardModal = function() {
+        document.getElementById('leaderboardModal').classList.remove('hidden');
+        window.loadPublicLeaderboard();
+    }
+
+    window.closeLeaderboardModal = function() {
+        document.getElementById('leaderboardModal').classList.add('hidden');
+    }
+
+    function makeStudentKey(name, school) {
+        const norm = t => t.trim().replace(/\s+/g, ' ').toLowerCase();
+        return (norm(name) + '__' + norm(school)).replace(/[.#$\/\[\]]/g, '_');
+    }
+
+    let idCheckTimer = null;
+    window.checkAndAssignId = function() {
+        clearTimeout(idCheckTimer);
+        const nameVal = document.getElementById('studentNameInput').value.trim();
+        const schoolVal = document.getElementById('schoolNameInput').value.trim();
+        const idDisplay = document.getElementById('studentIdDisplay');
+
+        if (!nameVal || !schoolVal) {
+            idDisplay.value = "";
+            return;
+        }
+
+        idCheckTimer = setTimeout(() => {
+            const key = makeStudentKey(nameVal, schoolVal);
+            db.ref('student_id_map/' + key).once('value').then(snap => {
+                if (snap.exists()) {
+                    idDisplay.value = snap.val();
+                } else {
+                    db.ref('last_student_seq_id').once('value').then(seqSnap => {
+                        idDisplay.value = "SM-" + ((seqSnap.val() || 100) + 1);
+                    });
+                }
+            });
+        }, 500);
+    }
+
+    window.reserveStudentId = function(name, school) {
+        const key = makeStudentKey(name, school);
+        const mapRef = db.ref('student_id_map/' + key);
+        return mapRef.once('value').then(snap => {
+            if (snap.exists()) return snap.val();
+            return db.ref('last_student_seq_id').transaction(cur => (cur || 100) + 1).then(res => {
+                const newId = "SM-" + res.snapshot.val();
+                return mapRef.transaction(existing => existing || newId).then(r => r.snapshot.val());
+            });
+        });
+    }
+
+    window.exportCloudBackup = function() {
+        db.ref('/').once('value').then(snapshot => {
+            let backupData = snapshot.val() || {};
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "Exam_Portal_Cloud_Backup_" + new Date().toISOString().slice(0,10) + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
+    }
+
+    window.importCloudBackup = function(event) {
+        let file = event.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let backupData = JSON.parse(e.target.result);
+                db.ref('/').set(backupData).then(() => {
+                    alert("ক্লাউড ব্যাকআপ সফলভাবে রিস্টোর হয়েছে!");
+                    window.loadCreatedExamsList();
+                    window.loadAdminRecords();
+                    window.loadDocSubjects();
+                });
+            } catch (err) {
+                alert("ফাইল পড়তে সমস্যা হয়েছে! সঠিক ব্যাকআপ ফাইল নির্বাচন করুন।");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    window.resetCloudIdSequence = function() {
+        if(confirm("আপনি কি নিশ্চিত যে শিক্ষার্থীর আইডি গণনা রিসেট করে আবার SM-101 থেকে শুরু করতে চান?")) {
+            db.ref('last_student_seq_id').set(100).then(() => {
+                db.ref('student_id_map').remove().then(() => {
+                    alert("ক্লাউড আইডি সিকোয়েন্স ও ম্যাপ সফলভাবে রিসেট হয়েছে! পরবর্তী শিক্ষার্থী SM-101 আইডি পাবে।");
+                    const idDisp = document.getElementById('studentIdDisplay');
+                    if(idDisp) idDisp.value = "";
+                });
+            });
+        }
+    }
+
+    window.openTeacherPanel = function() {
+        document.getElementById('startPage').classList.add('hidden');
+        document.getElementById('examForm').classList.add('hidden');
+        document.getElementById('resultBox').style.display = 'none';
+        document.getElementById('teacherPanel').classList.remove('hidden');
+        window.loadDocSubjects();
+    }
+
+    window.closeTeacherPanel = function() {
+        firebase.auth().signOut();
+        document.getElementById('teacherDashboard').classList.add('hidden');
+        document.getElementById('teacherLoginBox').classList.remove('hidden');
+        document.getElementById('teacherPanel').classList.add('hidden');
+        document.getElementById('startPage').classList.remove('hidden');
+        window.loadStudentChapterDropdown();
+    }
+
+    window.verifyTeacher = function() {
+        const email = document.getElementById('teacherEmail').value.trim();
+        const passInput = document.getElementById('teacherPass').value;
+
+        if(!email || !passInput) {
+            alert("ইমেইল ও পাসওয়ার্ড দুটোই দিন।");
+            return;
+        }
+
+        firebase.auth().signInWithEmailAndPassword(email, passInput).then(() => {
+            document.getElementById('teacherLoginBox').classList.add('hidden');
+            document.getElementById('teacherDashboard').classList.remove('hidden');
+            document.getElementById('teacherPass').value = "";
+            window.loadCreatedExamsList();
+            window.loadAdminRecords();
+            window.loadDocSubjects();
+        }).catch(() => {
+            alert("ভুল ইমেইল বা পাসওয়ার্ড! সঠিক তথ্য দিন।");
+        });
+    }
+
+    const subjectsList = [
+        "চারুপাঠ", "আনন্দপাঠ", "বাংলা ব্যাকরণ ও নির্মিতি", "English For Today",
+        "English Grammar and Composition", "গণিত", "তথ্য ও যোগাযোগ প্রযুক্তি",
+        "বাংলাদেশ ও বিশ্বপরিচয়", "বিজ্ঞান", "শারীরিক শিক্ষা ও স্বাস্থ্য",
+        "কর্ম ও জীবনমুখী শিক্ষা", "কৃষিশিক্ষা", "গার্হস্থ্যবিজ্ঞান", "চারু ও কারুকলা",
+        "ইসলাম শিক্ষা", "হিন্দুধর্ম শিক্ষা", "খ্রিস্টধর্ম শিক্ষা", "বৌদ্ধধর্ম শিক্ষা",
+        "সহজ আরবি পাঠ", "সংস্কৃত", "পালি", "সংগীত", "ক্ষুদ্র নৃগোষ্ঠীর ভাষা ও সংস্কৃতি",
+        "ফাইনাল সিলেবাস পরীক্ষা (Universal)", "মডেল টেস্ট (Universal)"
+    ];
+
+    let timerInterval;
+    let activeQuestions = [];
+    let currentStudentId = "", currentStudentName = "", currentSchoolName = "", currentSubject = "", currentChapter = "";
+
+    window.onload = function() {
+        const savedTheme = localStorage.getItem('portal_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if(savedTheme === 'dark') {
+            const themeBtn = document.getElementById('themeBtn');
+            if(themeBtn) themeBtn.innerText = "☀️ লাইট মোড";
+        }
+        populateSubjects();
+        window.loadStudentChapterDropdown();
+
+        // রিফ্রেশ বা পেজ রিলোড হলে স্টেট ও রেজাল্ট রিকভার করা
+        let savedState = sessionStorage.getItem('portal_exam_state');
+        if (savedState) {
+            try {
+                let stateData = JSON.parse(savedState);
+                currentStudentId = stateData.studentId;
+                currentStudentName = stateData.studentName;
+                currentSchoolName = stateData.schoolName;
+                currentSubject = stateData.subject;
+                currentChapter = stateData.chapter;
+                activeQuestions = stateData.questions || [];
+
+                if (stateData.step === 'result' && stateData.resultHtml) {
+                    document.getElementById('startPage').classList.add('hidden');
+                    document.getElementById('examForm').classList.add('hidden');
+                    let resBox = document.getElementById('resultBox');
+                    resBox.style.display = 'block';
+                    
+                    document.getElementById('pdfStudentMeta').innerText = `আইডি: ${currentStudentId} | নাম: ${currentStudentName} | স্কুল: ${currentSchoolName} | পরীক্ষা: ${currentSubject} (${currentChapter})`;
+                    document.getElementById('scoreSummary').innerHTML = stateData.scoreSummaryHtml;
+                    document.getElementById('studentRankBox').innerHTML = stateData.rankBoxHtml;
+                    document.getElementById('resultDetails').innerHTML = stateData.resultHtml;
+                }
+                else if (stateData.step === 'exam' && activeQuestions.length > 0) {
+                    document.getElementById('startPage').classList.add('hidden');
+                    document.getElementById('examForm').classList.remove('hidden');
+                    document.getElementById('displayStudentName').innerText = `আইডি: ${currentStudentId} | নাম: ${currentStudentName}`;
+                    document.getElementById('displayDetails').innerText = `স্কুল: ${currentSchoolName} | পরীক্ষা: ${currentSubject} (${currentChapter})`;
+                    
+                    renderExam();
+                    startTimer(stateData.timeLeft || 600);
+                }
+            } catch(e) {
+                sessionStorage.removeItem('portal_exam_state');
+            }
+        }
+    };
+
+    function populateSubjects() {
+        const studentSub = document.getElementById('subjectInput');
+        const configSub = document.getElementById('configSubject');
+        const filterSub = document.getElementById('filterSubject');
+        const pubFilterSub = document.getElementById('publicFilterSubject');
+
+        if(studentSub) studentSub.innerHTML = '';
+        if(configSub) configSub.innerHTML = '';
+        if(filterSub) filterSub.innerHTML = '<option value="all">সকল পরীক্ষা</option>';
+        if(pubFilterSub) pubFilterSub.innerHTML = '<option value="all">সকল পরীক্ষা</option>';
+
+        subjectsList.forEach(sub => {
+            if(studentSub) studentSub.innerHTML += `<option value="${sub}">${sub}</option>`;
+            if(configSub) configSub.innerHTML += `<option value="${sub}">${sub}</option>`;
+            if(filterSub) filterSub.innerHTML += `<option value="${sub}">${sub}</option>`;
+            if(pubFilterSub) pubFilterSub.innerHTML += `<option value="${sub}">${sub}</option>`;
+        });
+    }
+
+    window.loadStudentChapterDropdown = function() {
+        const selectedSubject = document.getElementById('subjectInput').value;
+        const chapterSelect = document.getElementById('chapterInput');
+        if(!chapterSelect) return;
+        chapterSelect.innerHTML = `<option value="">লোড হচ্ছে...</option>`;
+
+        db.ref('exam_created_topics').once('value').then(snapshot => {
+            let storeIndex = snapshot.val() || [];
+            let availableTopics = storeIndex.filter(item => item && item.subject === selectedSubject);
+            chapterSelect.innerHTML = '';
+            if (availableTopics.length === 0) {
+                chapterSelect.innerHTML = `<option value="">-- কোনো সেভ করা পরীক্ষা পাওয়া যায়নি --</option>`;
+            } else {
+                availableTopics.forEach(top => {
+                    chapterSelect.innerHTML += `<option value="${top.chapter}">${top.chapter}</option>`;
+                });
+            }
+        });
+    }
+
+    window.loadDocSubjects = function() {
+        const docSubSelect = document.getElementById('docSubjectSelect');
+        if(!docSubSelect) return;
+        docSubSelect.innerHTML = '';
+        subjectsList.forEach(sub => {
+            docSubSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+        });
+        window.loadDocChapters();
+    }
+
+    window.loadDocChapters = function() {
+        const selectedSub = document.getElementById('docSubjectSelect').value;
+        const docChapSelect = document.getElementById('docChapterSelect');
+        if(!docChapSelect) return;
+        docChapSelect.innerHTML = `<option value="">লোড হচ্ছে...</option>`;
+
+        db.ref('exam_created_topics').once('value').then(snapshot => {
+            let storeIndex = snapshot.val() || [];
+            let availableTopics = storeIndex.filter(item => item && item.subject === selectedSub);
+            docChapSelect.innerHTML = '';
+            if (availableTopics.length === 0) {
+                docChapSelect.innerHTML = `<option value="">-- কোনো সেভ করা পরীক্ষা নেই --</option>`;
+            } else {
+                availableTopics.forEach(top => {
+                    docChapSelect.innerHTML += `<option value="${top.chapter}">${top.chapter}</option>`;
+                });
+            }
+        });
+    }
+
+    window.loadPublicLeaderboard = function() {
+        db.ref('exam_portal_records').once('value').then(snapshot => {
+            let records = snapshot.val() || [];
+            const pubFilter = document.getElementById('publicFilterSubject');
+            const selectedSub = pubFilter ? pubFilter.value : 'all';
+            const tbody = document.getElementById('publicLeaderboardBody');
+            if(!tbody) return;
+
+            let filtered = records;
+            if (selectedSub !== 'all') {
+                filtered = records.filter(r => r && r.subject === selectedSub);
+            }
+
+            filtered.sort((a, b) => b.scoreNum - a.scoreNum);
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; opacity: 0.7; padding: 15px;">এখনো পর্যন্ত কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((r, idx) => {
+                let rankEmoji = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '';
+                html += `
+                <tr>
+                    <td style="font-weight: bold; text-align: center;">${rankEmoji}${toBanglaNum(idx + 1)} স্থান</td>
+                    <td style="font-weight: bold; color: var(--primary);">${r.studentId}</td>
+                    <td><span class="tag-subject">${r.subject} (${r.chapter})</span></td>
+                    <td style="font-weight: bold; color: var(--primary); text-align: center;">${r.score}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    function toBanglaNum(num) {
+        return num.toString().replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+    }
+
+    function parseQuestions(text) {
+        if(!text) return [];
+        const list = [];
+        const blocks = text.trim().split(/\n\s*\n/);
+        blocks.forEach(block => {
+            const lines = block.split('\n');
+            let q = { questionLines: [], stemLines: [], options: [] };
+            let isParsingStem = false;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (trimmed.startsWith('Q:')) {
+                    let cleanQ = trimmed.replace('Q:', '').trim().replace(/^[০-৯\d]+[\.\)]\s*/, '');
+                    q.questionLines.push(cleanQ);
+                }
+                else if (trimmed.startsWith('Stem:')) {
+                    isParsingStem = true;
+                    let cleanStem = trimmed.replace('Stem:', '').trim();
+                    if (cleanStem) q.stemLines.push(cleanStem);
+                }
+                else if (trimmed.match(/^[A-D]\)/)) {
+                    isParsingStem = false;
+                    q.options.push(trimmed.replace(/^[A-D]\)/, '').trim());
+                }
+                else if (trimmed.startsWith('Ans:')) {
+                    isParsingStem = false;
+                    const char = trimmed.replace('Ans:', '').trim().toUpperCase();
+                    q.ansIndex = char.charCodeAt(0) - 65; 
+                }
+                else if (trimmed.startsWith('Exp:')) {
+                    isParsingStem = false;
+                    q.exp = trimmed.replace('Exp:', '').trim();
+                }
+                else if (isParsingStem && trimmed !== '') {
+                    q.stemLines.push(trimmed);
+                }
+                else if (q.questionLines.length > 0 && q.options.length === 0 && !isParsingStem && trimmed !== '') {
+                    q.questionLines.push(trimmed);
+                }
+            });
+
+            if (q.questionLines.length > 0) {
+                q.question = q.questionLines.join('<br>');
+                q.stem = q.stemLines.join('<br>');
+                list.push(q);
+            }
+        });
+        return list;
+    }
+
+    const banglaLetters = ['ক', 'খ', 'গ', 'ঘ'];
+
+    window.startExam = function() {
+        const n = document.getElementById('studentNameInput').value.trim();
+        const sc = document.getElementById('schoolNameInput').value.trim();
+        const ch = document.getElementById('chapterInput').value;
+        if (!n || !sc) { alert("দয়া করে আপনার নাম এবং স্কুলের নাম সঠিকভাবে লিখুন!"); return; }
+        if (!ch) { alert("কোনো অধ্যায় বা সিলেবাস সিলেক্ট করা হয়নি!"); return; }
+        window.reserveStudentId(n, sc).then(id => {
+            document.getElementById('studentIdDisplay').value = id;
+            window.startExamCore();
+        });
+    }
+
+    window.startExamCore = function() {
+        const idDisp = document.getElementById('studentIdDisplay');
+        const nameInp = document.getElementById('studentNameInput');
+        const schoolInp = document.getElementById('schoolNameInput');
+        const subInp = document.getElementById('subjectInput');
+        const chapInp = document.getElementById('chapterInput');
+
+        currentStudentId = idDisp ? idDisp.value.trim() : '';
+        currentStudentName = nameInp ? nameInp.value.trim() : '';
+        currentSchoolName = schoolInp ? schoolInp.value.trim() : '';
+        currentSubject = subInp ? subInp.value : '';
+        currentChapter = chapInp ? chapInp.value : '';
+
+        if(!currentStudentName || !currentSchoolName || !currentStudentId) {
+            alert("দয়া করে আপনার নাম এবং স্কুলের নাম সঠিকভাবে লিখুন!");
+            return;
+        }
+
+        if(!currentChapter) {
+            alert("কোনো অধ্যায় বা সিলেবাস সিলেক্ট করা হয়নি!");
+            return;
+        }
+
+        let safeKeyName = (currentSubject + "_" + currentChapter).replace(/[.#$\/\[\]]/g, "_");
+        db.ref('configs/' + safeKeyName).once('value').then(snapshot => {
+            let config = snapshot.val();
+            if (!config) {
+                alert("এই পরীক্ষার প্রশ্ন পাওয়ার ক্ষেত্রে ক্লাউডে ত্রুটি হয়েছে।");
+                return;
+            }
+
+            activeQuestions = parseQuestions(config.markdown);
+            if(activeQuestions.length === 0) {
+                alert("প্রশ্ন ফরমেটে সমস্যা রয়েছে! শিক্ষককে জানান।");
+                return;
+            }
+
+            let totalSecs = config.time * 60;
+            sessionStorage.setItem('portal_exam_state', JSON.stringify({
+                step: 'exam',
+                studentId: currentStudentId,
+                studentName: currentStudentName,
+                schoolName: currentSchoolName,
+                subject: currentSubject,
+                chapter: currentChapter,
+                questions: activeQuestions,
+                userAnswers: {},
+                timeLeft: totalSecs
+            }));
+
+            document.getElementById('startPage').classList.add('hidden');
+            document.getElementById('examForm').classList.remove('hidden');
+            document.getElementById('displayStudentName').innerText = `আইডি: ${currentStudentId} | নাম: ${currentStudentName}`;
+            document.getElementById('displayDetails').innerText = `স্কুল: ${currentSchoolName} | পরীক্ষা: ${currentSubject} (${currentChapter})`;
+
+            renderExam();
+            startTimer(totalSecs);
+        });
+    }
+
+    window.saveUserAnswer = function(qIdx, oIdx) {
+        let savedState = JSON.parse(sessionStorage.getItem('portal_exam_state') || '{}');
+        if(!savedState.userAnswers) {
+            savedState.userAnswers = {};
+        }
+        savedState.userAnswers[qIdx] = oIdx;
+        sessionStorage.setItem('portal_exam_state', JSON.stringify(savedState));
+    }
+
+    function renderExam() {
+        const container = document.getElementById('questionsContainer');
+        if(!container) return;
+        
+        let savedState = JSON.parse(sessionStorage.getItem('portal_exam_state') || '{}');
+        let userAnswers = savedState.userAnswers || {};
+
+        let html = '';
+        activeQuestions.forEach((q, qIdx) => {
+            let stemHtml = q.stem ? `<div class="stem-box">${q.stem}</div>` : '';
+            html += `
+            <div class="q-card" id="q_block_${qIdx}">
+                <div class="q-title">প্রশ্ন ${toBanglaNum(qIdx + 1)}. ${q.question}</div>
+                ${stemHtml}
+                ${q.options.map((opt, oIdx) => {
+                    let isChecked = (userAnswers[qIdx] === oIdx) ? 'checked' : '';
+                    return `
+                    <label class="option-label" id="lbl_${qIdx}_${oIdx}">
+                        <input type="radio" name="q_${qIdx}" value="${oIdx}" ${isChecked} onclick="window.saveUserAnswer(${qIdx},${oIdx})">
+                        <span class="custom-radio">${banglaLetters[oIdx]}</span>
+                        <span class="option-text">${opt}</span>
+                    </label>`;
+                }).join('')}
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function startTimer(duration) {
+        let timer = duration, minutes, seconds;
+        const display = document.getElementById('timerDisplay');
+        
+        timerInterval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+            if(display) display.textContent = toBanglaNum(minutes < 10 ? "0" + minutes : minutes) + ":" + toBanglaNum(seconds < 10 ? "0" + seconds : seconds);
+
+            let savedState = JSON.parse(sessionStorage.getItem('portal_exam_state') || '{}');
+            savedState.timeLeft = timer;
+            sessionStorage.setItem('portal_exam_state', JSON.stringify(savedState));
+
+            if (--timer < 0) {
+                clearInterval(timerInterval);
+                alert("সময় শেষ! খাতা জমা হয়ে যাচ্ছে।");
+                window.submitExam();
+            }
+        }, 1000);
+    }
+
+    window.submitExam = function() {
+        clearInterval(timerInterval);
+        
+        let correctCount = 0;
+        let wrongCount = 0;
+        let skippedCount = 0;
+        let detailsHtml = '';
+
+        let savedState = JSON.parse(sessionStorage.getItem('portal_exam_state') || '{}');
+        let userAnswers = savedState.userAnswers || {};
+
+        activeQuestions.forEach((q, qIdx) => {
+            const selected = document.querySelector(`input[name="q_${qIdx}"]:checked`);
+            let userVal = selected ? parseInt(selected.value) : (userAnswers[qIdx] !== undefined ? userAnswers[qIdx] : -1);
+
+            let statusBadge = '';
+            let summaryBox = '';
+
+            let optionsListHtml = '<div class="res-opt-list">';
+            q.options.forEach((opt, oIdx) => {
+                let itemClass = 'res-opt-item';
+                if (userVal === oIdx) {
+                    itemClass += (oIdx === q.ansIndex) ? ' user-correct' : ' user-wrong';
+                } else if (oIdx === q.ansIndex) {
+                    itemClass += ' correct-target';
+                }
+                optionsListHtml += `<div class="${itemClass}">(${banglaLetters[oIdx]}) ${opt}</div>`;
+            });
+            optionsListHtml += '</div>';
+
+            if (userVal === -1) {
+                skippedCount++;
+                statusBadge = `<span class="badge-skipped">স্কিপড</span>`;
+                summaryBox = `<div class="ans-summary-line skipped">⚠️ কোনো উত্তর দেওয়া হয়নি। (সঠিক উত্তর: ${banglaLetters[q.ansIndex]}) ${q.options[q.ansIndex]}</div>`;
+            } else {
+                if (userVal === q.ansIndex) {
+                    correctCount++;
+                    statusBadge = `<span class="badge-correct">সঠিক</span>`;
+                    summaryBox = `<div class="ans-summary-line correct">✔️ আপনার উত্তর সঠিক হয়েছে: <strong>${banglaLetters[userVal]}) ${q.options[userVal]}</strong></div>`;
+                } else {
+                    wrongCount++;
+                    statusBadge = `<span class="badge-wrong">ভুল</span>`;
+                    summaryBox = `<div class="ans-summary-line wrong">❌ আপনার উত্তর ভুল। সঠিক উত্তর: <strong>${banglaLetters[q.ansIndex]}) ${q.options[q.ansIndex]}</strong></div>`;
+                }
+            }
+
+            let stemResHtml = q.stem ? `<div style="margin-bottom: 6px; font-weight: 500;">${q.stem}</div>` : '';
+
+            detailsHtml += `
+            <div class="q-card">
+                <div class="q-title">
+                    <span>প্রশ্ন ${toBanglaNum(qIdx + 1)}. ${q.question}</span>
+                    <span>${statusBadge}</span>
+                </div>
+                ${stemResHtml}
+                ${optionsListHtml}
+                ${summaryBox}
+                ${q.exp ? `<div class="exp-box"><strong>💡 ব্যাখ্যা:</strong> ${q.exp}</div>` : ''}
+            </div>`;
+        });
+
+        let examTimestamp = new Date().toLocaleString();
+        let newRecord = {
+            studentId: currentStudentId,
+            name: currentStudentName,
+            school: currentSchoolName,
+            subject: currentSubject,
+            chapter: currentChapter,
+            scoreNum: correctCount,
+            score: `${toBanglaNum(correctCount)} / ${toBanglaNum(activeQuestions.length)}`,
+            time: examTimestamp
+        };
+
+        db.ref('exam_portal_records').once('value').then(snapshot => {
+            let records = snapshot.val() || [];
+            records.push(newRecord);
+            db.ref('exam_portal_records').set(records);
+
+            let sameExamRecords = records.filter(r => r && r.subject === currentSubject && r.chapter === currentChapter);
+            sameExamRecords.sort((a, b) => b.scoreNum - a.scoreNum);
+            
+            let rank = sameExamRecords.findIndex(r => r && r.studentId === currentStudentId && r.time === examTimestamp) + 1;
+            let totalParticipants = sameExamRecords.length;
+
+            document.getElementById('examForm').classList.add('hidden');
+            let resBox = document.getElementById('resultBox');
+            resBox.style.display = 'block';
+            
+            let scoreSumHtml = `প্রাপ্ত নম্বর: ${toBanglaNum(correctCount)} / ${toBanglaNum(activeQuestions.length)}`;
+            let rankBoxHtml = `🎯 আইডি (${currentStudentId}) আপনি ঠিক ${toBanglaNum(totalParticipants)} জনের মধ্যে <strong>ফলাফল অনুযায়ী ঠিক ${toBanglaNum(rank)} তম</strong> স্থান অর্জন করেছেন!`;
+            
+            document.getElementById('pdfStudentMeta').innerText = `আইডি: ${currentStudentId} | নাম: ${currentStudentName} | স্কুল: ${currentSchoolName} | পরীক্ষা: ${currentSubject} (${currentChapter})`;
+            document.getElementById('scoreSummary').innerHTML = scoreSumHtml;
+            document.getElementById('studentRankBox').innerHTML = rankBoxHtml;
+            document.getElementById('resultDetails').innerHTML = detailsHtml;
+
+            // ফলাফল পেজে থাকার পর রিফ্রেশ দিলেও যেন না হারায়, তার জন্য সেশনে সেভ করে রাখা
+            let resultState = {
+                step: 'result',
+                studentId: currentStudentId,
+                studentName: currentStudentName,
+                schoolName: currentSchoolName,
+                subject: currentSubject,
+                chapter: currentChapter,
+                scoreSummaryHtml: scoreSumHtml,
+                rankBoxHtml: rankBoxHtml,
+                resultHtml: detailsHtml
+            };
+            sessionStorage.setItem('portal_exam_state', JSON.stringify(resultState));
+        });
+    }
+
+    window.returnHome = function() {
+        sessionStorage.removeItem('portal_exam_state');
+        location.reload();
+    }
+
+    window.downloadSimpleWordDoc = function() {
+        const schoolName = document.getElementById('docSchoolName').value;
+        const examTitle = document.getElementById('docExamTitle').value;
+        const classInfo = document.getElementById('docClass').value;
+        const timeInfo = document.getElementById('docTime').value;
+        const marksInfo = document.getElementById('docMarks').value;
+        const selectedSub = document.getElementById('docSubjectSelect').value;
+        const selectedChap = document.getElementById('docChapterSelect').value;
+
+        if(!selectedChap) {
+            alert("দয়া করে সঠিক পরীক্ষা বা অধ্যায় সিলেক্ট করুন!");
+            return;
+        }
+
+        let safeKeyName = (selectedSub + "_" + selectedChap).replace(/[.#$\/\[\]]/g, "_");
+        db.ref('configs/' + safeKeyName).once('value').then(snapshot => {
+            let config = snapshot.val();
+            if (!config) {
+                alert("এই পরীক্ষার কোনো প্রশ্ন ক্লাউডে সংরক্ষিত পাওয়া যায়নি!");
+                return;
+            }
+
+            let parsed = parseQuestions(config.markdown);
+            if(parsed.length === 0) {
+                alert("প্রশ্নগুলো পড়তে সমস্যা হয়েছে।");
+                return;
+            }
+
+            let htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>Exam Question Paper</title>
+                <style>
+                    body { font-family: 'SolaimanLipi', Arial, sans-serif; font-size: 13pt; line-height: 1.5; }
+                    .header { text-align: center; margin-bottom: 20px; border-bottom: 1.5px solid #000; padding-bottom: 10px; }
+                    .header h2 { margin: 0; font-size: 16pt; }
+                    .header h3 { margin: 3px 0; font-size: 14pt; }
+                    .header p { margin: 2px 0; font-size: 11pt; }
+                    .note { font-size: 10pt; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 8px; }
+                    .question { margin-bottom: 14px; page-break-inside: avoid; }
+                    .options-table { width: 100%; margin-left: 20px; }
+                    .options-table td { width: 50%; padding-bottom: 4px; font-size: 12pt; }
+                    .answer-key { margin-top: 30px; border-top: 1.5px solid #000; padding-top: 10px; page-break-before: always; }
+                </style>
+                </head>
+                <body>
+                <div class="header">
+                    <h2>${schoolName}</h2>
+                    <h3>${examTitle}</h3>
+                    <p><b>${classInfo} | বিষয়: ${selectedSub} (${selectedChap})</b></p>
+                    <p>সময়: ${timeInfo} &nbsp;&nbsp;&nbsp;&nbsp; পূর্ণমান: ${marksInfo}</p>
+                </div>
+                <div class="note">
+                    [ বিশেষ দ্রষ্টব্য: সঠিক উত্তরের বৃত্তটি বল পয়েন্ট কলম দ্বারা সম্পূর্ণ ভরাট করো। সকল প্রশ্নের মান সমান। ]
+                </div>
+            `;
+
+            parsed.forEach((q, idx) => {
+                let stemTextDoc = q.stem ? `<p style="margin: 2px 0 5px 0;">${q.stem}</p>` : '';
+                htmlContent += `
+                    <div class="question">
+                        <p style="margin-bottom: 3px;"><b>${toBanglaNum(idx + 1)}. ${q.question}</b></p>
+                        ${stemTextDoc}
+                        <table class="options-table">
+                            <tr>
+                                <td>(ক) ${q.options[0]}</td>
+                                <td>(খ) ${q.options[1]}</td>
+                            </tr>
+                            <tr>
+                                <td>(গ) ${q.options[2]}</td>
+                                <td>(ঘ) ${q.options[3]}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            });
+
+            htmlContent += `
+                <div class="answer-key">
+                    <h3>উত্তরমালা (Answer Key)</h3>
+                    <p><b>পরীক্ষা:</b> ${selectedSub} (${selectedChap})</p>
+                    <p>
+            `;
+            parsed.forEach((q, idx) => {
+                let letter = banglaLetters[q.ansIndex];
+                htmlContent += `<b>${toBanglaNum(idx + 1)}:</b> ${letter}, &nbsp;&nbsp;`;
+            });
+            htmlContent += `</p></div></body></html>`;
+
+            let blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedSub}_${selectedChap}_Question.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    window.saveTeacherSettings = function() {
+        const sub = document.getElementById('configSubject').value;
+        const chap = document.getElementById('configChapterText').value.trim();
+        const time = parseInt(document.getElementById('configTime').value) || 10;
+        const markdown = document.getElementById('configMarkdown').value;
+
+        if(!chap) { alert("দয়া করে অধ্যায় বা সিলেবাসের নাম লিখুন!"); return; }
+        if(!markdown.trim()){ alert("দয়া করে প্রশ্ন ইনপুট দিন!"); return; }
+
+        let safeKeyName = (sub + "_" + chap).replace(/[.#$\/\[\]]/g, "_");
+        const newConfig = { time, markdown };
+        
+        db.ref('configs/' + safeKeyName).set(newConfig).then(() => {
+            db.ref('exam_created_topics').once('value').then(snapshot => {
+                let storeIndex = snapshot.val() || [];
+                if(!storeIndex.some(item => item && item.subject === sub && item.chapter === chap)) {
+                    storeIndex.push({ subject: sub, chapter: chap });
+                    db.ref('exam_created_topics').set(storeIndex);
+                }
+                alert(`"${sub}" ক্যাটাগরির "${chap}" পরীক্ষাটি ক্লাউডে সফলভাবে সেভ হয়েছে!`);
+                document.getElementById('configChapterText').value = "";
+                document.getElementById('configMarkdown').value = "";
+                window.loadCreatedExamsList();
+                window.loadDocSubjects();
+            });
+        });
+    }
+
+    window.loadCreatedExamsList = function() {
+        db.ref('exam_created_topics').once('value').then(snapshot => {
+            let storeIndex = snapshot.val() || [];
+            const tbody = document.getElementById('createdExamsBody');
+            if(!tbody) return;
+            if (storeIndex.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; opacity: 0.7; padding: 15px;">কোনো পরীক্ষা তৈরি করা হয়নি।</td></tr>`;
+                return;
+            }
+            let html = '';
+            storeIndex.forEach((item, idx) => {
+                if(item) {
+                    html += `
+                    <tr>
+                        <td style="font-weight: bold; color: var(--primary);">${item.subject}</td>
+                        <td>${item.chapter}</td>
+                        <td style="text-align: center;"><button class="btn-delete" onclick="window.deleteExamSetup(${idx})">🗑️ ডিলিট</button></td>
+                    </tr>`;
+                }
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    window.deleteExamSetup = function(index) {
+        if (confirm("আপনি কি সত্যিই এই পরীক্ষা সেটআপটি ক্লাউড থেকে মুছে ফেলতে চান?")) {
+            db.ref('exam_created_topics').once('value').then(snapshot => {
+                let storeIndex = snapshot.val() || [];
+                let target = storeIndex[index];
+                if(target) {
+                    let safeKeyName = (target.subject + "_" + target.chapter).replace(/[.#$\/\[\]]/g, "_");
+                    db.ref('configs/' + safeKeyName).remove();
+                }
+                storeIndex.splice(index, 1);
+                db.ref('exam_created_topics').set(storeIndex).then(() => {
+                    window.loadCreatedExamsList();
+                    window.loadDocSubjects();
+                    alert("পরীক্ষাটি ক্লাউড থেকে সফলভাবে মুছে ফেলা হয়েছে।");
+                });
+            });
+        }
+    }
+
+    window.loadAdminRecords = function() {
+        db.ref('exam_portal_records').once('value').then(snapshot => {
+            let records = snapshot.val() || [];
+            const filterSub = document.getElementById('filterSubject');
+            const selectedSub = filterSub ? filterSub.value : 'all';
+            const tbody = document.getElementById('adminRecordsBody');
+            if(!tbody) return;
+
+            let filtered = records;
+            if (selectedSub !== 'all') {
+                filtered = records.filter(r => r && r.subject === selectedSub);
+            }
+
+            filtered.sort((a, b) => b.scoreNum - a.scoreNum);
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; opacity: 0.7; padding: 15px;">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((r, idx) => {
+                let rankEmoji = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '';
+                html += `
+                <tr>
+                    <td style="font-weight: bold; text-align: center;">${rankEmoji}${toBanglaNum(idx + 1)}</td>
+                    <td style="font-weight: bold; color: var(--primary);">${r.studentId}</td>
+                    <td style="font-weight: bold;">${r.name}</td>
+                    <td>${r.school}</td>
+                    <td><span class="tag-subject">${r.subject} (${r.chapter})</span></td>
+                    <td style="font-weight: bold; color: var(--primary); text-align: center;">${r.score}</td>
+                    <td style="font-size: 11px; opacity: 0.8;">${r.time}</td>
+                    <td style="text-align: center;"><button class="btn-delete" onclick="window.deleteRecord(${idx})">🗑️ ডিলিট</button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    window.deleteRecord = function(index) {
+        if (confirm("আপনি কি সত্যিই এই রেকর্ডটি মুছে ফেলতে চান?")) {
+            db.ref('exam_portal_records').once('value').then(snapshot => {
+                let records = snapshot.val() || [];
+                records.splice(index, 1);
+                db.ref('exam_portal_records').set(records).then(() => {
+                    window.loadAdminRecords();
+                });
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
